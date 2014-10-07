@@ -1,64 +1,74 @@
-(function(){
-  'use strict';
 
-   window.Ass = {};
-  Ass.Views = {};
-  Ass.Models = {};
-  Ass.Collections = {};
+/* global Backbone, _, $ */
+'use strict';
 
-
-Ass.Collections.Person = Backbone.Collection.extend({
-  model: Ass.Models.Person,
-  url: ' http://tiny-pizza-server.herokuapp.com/collections/people'
+var BlogCollections = Backbone.Collection.extend({
+  model: BlogModel,
+  url: '//tiny-pizza-server.herokuapp.com/collections/people'
 });
 
-Ass.Models.Person = Backbone.Model.extend({
+var BlogModel = Backbone.Model.extend({
 
-  validate: function(attirbutes){
-    if (!attributes.firstName)
+  validate: function(attributes){
+    if (!attributes.firstName){
       return "First name is required.";
-
-    if (!attributes.lastName)
+    }
+    if(!attributes.lastName){
       return "Last name is required.";
-
-    if (!attributes.phone)
-      return "Phone number is required.";
-
-    if (!attributes.address)
-      return "Address is required.";
-
-    if (!attributes.zipcode)
-      return "Zipcode is required.";
+    }
+    if(!attributes.phone){
+      return "Phone number is required";
+    }
+    if(!attributes.address){
+      return "Address is required";
+    }
+    if(!attributes.zipcode){
+      return "Zipcode is required";
+    }
   },
-  idAttribute: '_id',
-
 });
-
-
-Ass.Views.Person = Backbone.View.extend({
-  tagName: 'form',
-  className: 'form',
+var BlogView = Backbone.View.extend({
+  tagName: 'div',
+  className: 'blog-view',
   template: _.template($('#form-template').text()),
 
   events: {
-    'click .save': 'saveForm'
+    'click .save': 'saveForm',
   },
 
-  initialize: function(options){
-    options = options || {};
-    this.$container = options.$container ||$('body');
-    this.template = options.$template;
-    this.container.append(this.el);
-    this.render();
-    this.listenTo(this.collection, 'invalid', this.error);
+  saveForm: function(){
+    var data = $('form').serializeObject();
+    this.model.save(data);
   },
+
+  initialize: function(){
+    this.render();
+    this.listenTo(this.model, 'invalid', this.invalidUser);
+  },
+
   render: function(){
-    this.$el.html(this.template(this.model));
-  }
+    $('body').append(this.$el.html(this.template()));
+  },
+
+  invalidUser: function(model,error){
+			// add class to highlight validation errors.
+			$('form input').addClass('invalid');
+			alert(error);
+		},
+
 });
 
+	$.fn.serializeObject = function(){
+	  return this.serializeArray().reduce(function(acum, i){
+	    acum[i.name] = i.value;
+	    return acum;
+	  }, {});
+	};
+
+
+$(document).ready(function(){
 
 
 
 
-}());
+});
